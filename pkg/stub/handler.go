@@ -3,7 +3,7 @@ package stub
 import (
 	"context"
 
-	"github.com/seletz/thingworx-operator/pkg/apis/thingworx/v1alpha1"
+	"github.com/nexiles/thingworx-operator/pkg/apis/thingworx/v1alpha1"
 
 	"github.com/operator-framework/operator-sdk/pkg/sdk"
 	"github.com/sirupsen/logrus"

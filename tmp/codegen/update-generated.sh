@@ -6,7 +6,7 @@ set -o pipefail
 
 vendor/k8s.io/code-generator/generate-groups.sh \
 deepcopy \
-github.com/seletz/thingworx-operator/pkg/generated \
-github.com/seletz/thingworx-operator/pkg/apis \
+github.com/nexiles/thingworx-operator/pkg/generated \
+github.com/nexiles/thingworx-operator/pkg/apis \
 thingworx:v1alpha1 \
 --go-header-file "./tmp/codegen/boilerplate.go.txt"
