@@ -32,6 +32,7 @@ func main() {
 	resyncPeriod := 5
 	logrus.Infof("Watching %s, %s, %s, %d", resource, kind, namespace, resyncPeriod)
 	sdk.Watch(resource, kind, namespace, resyncPeriod)
+	// sdk.Watch("v1", "Pod", namespace, 5)
 	sdk.Handle(stub.NewHandler())
 	sdk.Run(context.TODO())
 }
