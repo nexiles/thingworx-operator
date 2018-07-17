@@ -4,6 +4,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd/api"
 	"github.com/nexiles/thingworx-operator/pkg/apis/thingworx/v1alpha1"
+	"k8s.io/api/core/v1"
+	"bytes"
+	"text/template"
+	"fmt"
 )
 
 // addOwnerRefToObject appends the desired OwnerReference to the object
@@ -29,4 +33,28 @@ func asOwner(v *v1alpha1.Thingworx) metav1.OwnerReference {
 		UID:        v.UID,
 		Controller: &trueVar,
 	}
+}
+
+func setDefault(cm *v1.ConfigMap, key string, dflt string) *v1.ConfigMap{
+
+	if _, exists := cm.Data[key]; !exists {
+		cm.Data[key] = dflt
+	}
+
+	return cm
+}
+
+func renderConfigMapTemplate(cm *v1.ConfigMap, key string) (err error) {
+
+	if _, exists := cm.Data[key]; !exists {
+		return fmt.Errorf("renderConfigMapTemplate: key missing: %s", key)
+	}
+
+	var t1 = template.Must(template.New(key).Parse(cm.Data[key]))
+
+	buf := bytes.NewBufferString("")
+	t1.Execute(buf, cm.Data)
+	cm.Data[key] = buf.String()
+
+	return
 }
