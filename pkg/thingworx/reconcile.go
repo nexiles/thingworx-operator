@@ -20,6 +20,13 @@ func Reconcile(twx *v1alpha1.Thingworx) (err error) {
 
 	if twx.Status.Phase == v1alpha1.ClusterPhaseInitial {
 		logrus.Infof("Reconcile: initial phase.")
+
+		// Create the ConfigMap resource for this cluster.
+		err = CreateConfigMap(twx)
+		if err != nil {
+			return
+		}
+		
 	}
 
 	return
