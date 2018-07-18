@@ -29,6 +29,8 @@ func CreateSecrets(twx *v1alpha1.Thingworx) (secret *v1.Secret, err error) {
 		},
 	}
 
+	addOwnerRefToObject(secret, asOwner(twx))
+
 	err = sdk.Create(secret)
 	if err != nil && !errors.IsAlreadyExists(err)  {
 		return nil, fmt.Errorf("could not create Secret (%s): %v", secret.Name, err)
