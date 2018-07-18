@@ -10,14 +10,15 @@ import (
 
 const (
 	version   = "v1alpha1"
-	groupName = "thingworx.nexiles.com"
+	GroupName = "thingworx.nexiles.com"
+	ThingworxKind = "Thingworx"
 )
 
 var (
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
 	AddToScheme   = SchemeBuilder.AddToScheme
 	// SchemeGroupVersion is the group version used to register these objects.
-	SchemeGroupVersion = schema.GroupVersion{Group: groupName, Version: version}
+	SchemeGroupVersion = schema.GroupVersion{Group: GroupName, Version: version}
 )
 
 func init() {

@@ -2,3 +2,5 @@ apiVersion: "thingworx.nexiles.com/v1alpha1"
 kind: "Thingworx"
 metadata:
   name: "example"
+spec:
+  # configMapName: foo
