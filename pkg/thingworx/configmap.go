@@ -55,10 +55,10 @@ cd $CATALINA_HOME
 bin/catalina.sh run
 `
 
-func CreateConfigMap(twx *v1alpha1.Thingworx) (err error) {
+func CreateConfigMap(twx *v1alpha1.Thingworx, secrets *v1.Secret) (cm *v1.ConfigMap, err error) {
 	logrus.Infof("Creating ConfigMap for cluster: %s", twx.GetName())
 
-	cm := &v1.ConfigMap{
+	cm = &v1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind: "ConfigMap",
 			APIVersion: "v1",
@@ -72,7 +72,7 @@ func CreateConfigMap(twx *v1alpha1.Thingworx) (err error) {
 		cm.Name = twx.Spec.ConfigMapName
 		err := sdk.Get(cm)
 		if err != nil {
-			return fmt.Errorf("prepare config error: get configmap (%s) failed: %v", twx.Spec.ConfigMapName, err)
+			return nil, fmt.Errorf("prepare config error: get configmap (%s) failed: %v", twx.Spec.ConfigMapName, err)
 		}
 	}
 
@@ -80,17 +80,17 @@ func CreateConfigMap(twx *v1alpha1.Thingworx) (err error) {
 	cm.Labels = labelsForThingworx(twx.GetName())
 
 	setDefaultConfig(twx, cm)
-	updatePlatformSettings(twx, cm)
+	updatePlatformSettings(twx, cm, secrets)
 
 	addOwnerRefToObject(cm, asOwner(twx))
 
 	err = sdk.Create(cm)
 	if err != nil && !errors.IsAlreadyExists(err)  {
-		logrus.Errorf("Could not create ConfigMap (%s): %v", cm.Name, err)
+		return nil, fmt.Errorf("could not create ConfigMap (%s) %v", cm.Name, err)
 	}
 
 	logrus.Infof("Created ConfigMap: %s", cm.Name)
-	return nil
+	return cm, nil
 }
 
 func setDefaultConfig(twx *v1alpha1.Thingworx, cm *v1.ConfigMap) {
@@ -108,19 +108,17 @@ func setDefaultConfig(twx *v1alpha1.Thingworx, cm *v1.ConfigMap) {
 	setDefault(cm, startupScriptKey, startupScriptTemplate)
 }
 
-func updatePlatformSettings(twx *v1alpha1.Thingworx, cm *v1.ConfigMap) *v1.ConfigMap {
-	// TODO: Actually replace things here
+func updatePlatformSettings(twx *v1alpha1.Thingworx, cm *v1.ConfigMap, secrets *v1.Secret) *v1.ConfigMap {
+	var data, _ = copyMap(cm.Data)
 
-	if renderConfigMapTemplate(cm, platformSettingsKey) != nil {
+	if renderConfigMapTemplate(cm, platformSettingsKey, data) != nil {
 		return cm
 	}
-	if renderConfigMapTemplate(cm, startupScriptKey) != nil {
+
+	if renderConfigMapTemplate(cm, startupScriptKey, data) != nil {
 		return cm
 	}
 
 	return cm
 }
 
-func configMapName(twx *v1alpha1.Thingworx) string {
-	return fmt.Sprintf("%s.configmap.thingworxes.%s", twx.GetName(), v1alpha1.GroupName)
-}
